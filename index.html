@@ -42,6 +42,17 @@
             margin-top: 5px;
         }
         
+        .conversion-rule {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 10px;
+            border-radius: 50px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+            border: 2px dashed #38bdf8;
+        }
+        
         .counters {
             display: flex;
             justify-content: space-around;
@@ -49,10 +60,12 @@
             padding: 20px;
             background: #f8f9fa;
             border-radius: 20px;
+            position: relative;
         }
         
         .counter-item {
             text-align: center;
+            position: relative;
         }
         
         .counter-emoji {
@@ -75,6 +88,24 @@
         .counter-label {
             font-size: 16px;
             color: #64748b;
+        }
+        
+        .progress-bar {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #38bdf8;
+            width: 0%;
+            transition: width 0.3s;
         }
         
         /* Кнопки оценок */
@@ -108,7 +139,18 @@
             background: linear-gradient(145deg, #e0f2fe, #bae6fd);
         }
         
-        /* Пароль (появляется при нажатии) */
+        /* Анимация конвертации */
+        @keyframes convert {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background: #fbbf24; }
+            100% { transform: scale(1); }
+        }
+        
+        .conversion-animation {
+            animation: convert 0.5s ease;
+        }
+        
+        /* Модальное окно с паролем */
         .password-overlay {
             display: none;
             position: fixed;
@@ -230,10 +272,31 @@
             background: white;
             border-radius: 12px;
             margin-bottom: 8px;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .history-emoji {
             font-size: 28px;
+        }
+        
+        .history-conversion {
+            background: #fbbf24;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 8px;
         }
         
         .history-time {
@@ -254,6 +317,11 @@
             border-radius: 50px;
             color: #64748b;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reset-btn:hover {
+            background: #e2e8f0;
         }
         
         .empty-history {
@@ -270,6 +338,11 @@
             <div class="child-name">Паши</div>
         </div>
         
+        <!-- Правило конвертации -->
+        <div class="conversion-rule">
+            ❄️❄️❄️❄️❄️ = ⭐ (5 снежинок = 1 звезда)
+        </div>
+        
         <!-- Счетчики -->
         <div class="counters">
             <div class="counter-item">
@@ -281,6 +354,10 @@
                 <div class="counter-emoji">❄️</div>
                 <div class="counter-number snowflake-number" id="snowflakeCount">0</div>
                 <div class="counter-label">снежинок</div>
+                <!-- Прогресс до следующей звезды -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="snowflakeProgress"></div>
+                </div>
             </div>
         </div>
         
@@ -325,10 +402,11 @@
     <script>
         // НАСТРОЙКИ
         const PARENT_PASSWORD = "1234"; // 4-значный пароль
-        const STORAGE_KEY = 'pasha_ratings';
+        const STORAGE_KEY = 'pasha_ratings_conversion';
+        const SNOWFLAKES_TO_STAR = 5; // 5 снежинок = 1 звезда
         
         let ratings = [];
-        let selectedType = null; // 'star' или 'snowflake'
+        let selectedType = null;
         
         // Загрузка данных
         function init() {
@@ -391,7 +469,6 @@
             moveToNext(lastInput, null);
             checkDigitsFilled();
             
-            // Автоматическая отправка при вводе последней цифры
             const d1 = document.getElementById('digit1').value;
             const d2 = document.getElementById('digit2').value;
             const d3 = document.getElementById('digit3').value;
@@ -412,11 +489,9 @@
             const enteredPassword = d1 + d2 + d3 + d4;
             
             if (enteredPassword === PARENT_PASSWORD) {
-                // Правильный пароль - ставим оценку
                 addRating(selectedType);
                 hidePasswordModal();
             } else {
-                // Неправильный пароль
                 document.getElementById('passwordError').textContent = 'Неверный пароль';
                 clearPassword();
                 document.getElementById('digit1').focus();
@@ -425,6 +500,7 @@
         
         // Добавление оценки
         function addRating(type) {
+            // Добавляем новую оценку
             const newRating = {
                 type: type,
                 timestamp: new Date().toISOString(),
@@ -432,12 +508,54 @@
             };
             
             ratings.push(newRating);
+            
+            // Проверяем конвертацию снежинок в звезды
+            checkAndConvertSnowflakes();
+            
+            // Сохраняем
             localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings));
+            
+            // Обновляем экран
             updateDisplay();
             
-            // Вибрация если есть
+            // Анимация на счетчике
+            document.querySelector('.counters').classList.add('conversion-animation');
+            setTimeout(() => {
+                document.querySelector('.counters').classList.remove('conversion-animation');
+            }, 500);
+            
+            // Вибрация
             if (window.navigator && window.navigator.vibrate) {
                 window.navigator.vibrate(10);
+            }
+        }
+        
+        // Проверка и конвертация снежинок в звезды
+        function checkAndConvertSnowflakes() {
+            let snowflakes = ratings.filter(r => r.type === 'snowflake').length;
+            
+            // Пока есть 5 или больше снежинок - конвертируем
+            while (snowflakes >= SNOWFLAKES_TO_STAR) {
+                // Удаляем 5 снежинок (самые старые)
+                let removed = 0;
+                ratings = ratings.filter(r => {
+                    if (r.type === 'snowflake' && removed < SNOWFLAKES_TO_STAR) {
+                        removed++;
+                        return false; // удаляем
+                    }
+                    return true;
+                });
+                
+                // Добавляем 1 звезду
+                ratings.push({
+                    type: 'star',
+                    timestamp: new Date().toISOString(),
+                    id: Date.now() + Math.random(),
+                    isConversion: true // отметка что это конвертация
+                });
+                
+                // Пересчитываем снежинки для следующей итерации
+                snowflakes = ratings.filter(r => r.type === 'snowflake').length;
             }
         }
         
@@ -449,6 +567,10 @@
             document.getElementById('starCount').textContent = starCount;
             document.getElementById('snowflakeCount').textContent = snowflakeCount;
             document.getElementById('totalCount').textContent = ratings.length + ' всего';
+            
+            // Обновляем прогресс до следующей звезды
+            const progress = (snowflakeCount % SNOWFLAKES_TO_STAR) / SNOWFLAKES_TO_STAR * 100;
+            document.getElementById('snowflakeProgress').style.width = progress + '%';
             
             // История
             const historyList = document.getElementById('historyList');
@@ -470,11 +592,25 @@
                 
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                item.innerHTML = `
-                    <span class="history-emoji">${rating.type === 'star' ? '⭐' : '❄️'}</span>
-                    <span>${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
-                    <span class="history-time">${timeStr}</span>
-                `;
+                
+                if (rating.isConversion) {
+                    // Специальное отображение для конвертации
+                    item.innerHTML = `
+                        <span class="history-emoji">⭐</span>
+                        <span>
+                            🎉 Конвертация: 5 ❄️ → ⭐
+                            <span class="history-conversion">+1 звезда</span>
+                        </span>
+                        <span class="history-time">${timeStr}</span>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <span class="history-emoji">${rating.type === 'star' ? '⭐' : '❄️'}</span>
+                        <span>${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
+                        <span class="history-time">${timeStr}</span>
+                    `;
+                }
+                
                 historyList.appendChild(item);
             });
         }
