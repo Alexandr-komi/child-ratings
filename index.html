@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оценки для Мишеньки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+        
+        .child-name {
+            font-size: 42px;
+            font-weight: bold;
+            color: #764ba2;
+            text-shadow: 2px 2px 4px rgba(118, 75, 162, 0.2);
+        }
+        
+        .counters {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 20px;
+        }
+        
+        .counter-item {
+            text-align: center;
+        }
+        
+        .counter-emoji {
+            font-size: 48px;
+            line-height: 1;
+        }
+        
+        .counter-number {
+            font-size: 54px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        
+        .star-number {
+            color: #fbbf24;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+        }
+        
+        .snowflake-number {
+            color: #38bdf8;
+            text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+        }
+        
+        .counter-label {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 25px;
+            font-size: 64px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .btn:active {
+            transform: scale(0.92);
+        }
+        
+        .btn-star {
+            background: linear-gradient(145deg, #fef9c3, #fde047);
+            color: #b45309;
+        }
+        
+        .btn-star:hover {
+            background: linear-gradient(145deg, #fde047, #facc15);
+            box-shadow: 0 12px 25px rgba(250, 204, 21, 0.4);
+        }
+        
+        .btn-snowflake {
+            background: linear-gradient(145deg, #e0f2fe, #bae6fd);
+            color: #0369a1;
+        }
+        
+        .btn-snowflake:hover {
+            background: linear-gradient(145deg, #bae6fd, #7dd3fc);
+            box-shadow: 0 12px 25px rgba(56, 189, 248, 0.4);
+        }
+        
+        .history-section {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .history-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-title h2 {
+            color: #334155;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .history-title span {
+            color: #64748b;
+            font-size: 14px;
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .history-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .history-emoji {
+            font-size: 28px;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .history-text {
+            flex: 1;
+            font-size: 16px;
+            color: #334155;
+        }
+        
+        .history-time {
+            color: #94a3b8;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .reset-btn {
+            background: none;
+            border: 2px solid #e2e8f0;
+            padding: 10px 25px;
+            border-radius: 50px;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reset-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        .empty-history {
+            text-align: center;
+            color: #94a3b8;
+            padding: 30px 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Оценки для</h1>
+            <div class="child-name" id="childName">Мишеньки</div>
+        </div>
+        
+        <div class="counters">
+            <div class="counter-item">
+                <div class="counter-emoji">⭐</div>
+                <div class="counter-number star-number" id="starCount">0</div>
+                <div class="counter-label">звездочек</div>
+            </div>
+            <div class="counter-item">
+                <div class="counter-emoji">❄️</div>
+                <div class="counter-number snowflake-number" id="snowflakeCount">0</div>
+                <div class="counter-label">снежинок</div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-star" onclick="addRating('star')">⭐</button>
+            <button class="btn btn-snowflake" onclick="addRating('snowflake')">❄️</button>
+        </div>
+        
+        <div class="history-section">
+            <div class="history-title">
+                <h2>📋 История</h2>
+                <span id="totalCount">0 всего</span>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- История будет здесь -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <button class="reset-btn" onclick="resetData()">🔄 Сбросить всё</button>
+        </div>
+    </div>
+
+    <script>
+        // НАСТРОЙКИ - поменяйте на имя вашего ребенка
+        const CHILD_NAME = "Мишенька";
+        
+        // Ключ для хранения в localStorage
+        const STORAGE_KEY = 'child_ratings';
+        
+        // Загружаем данные
+        let ratings = [];
+        
+        // Инициализация при загрузке
+        function init() {
+            // Устанавливаем имя ребенка
+            document.getElementById('childName').textContent = CHILD_NAME;
+            
+            // Загружаем сохраненные оценки
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    ratings = JSON.parse(saved);
+                } catch (e) {
+                    ratings = [];
+                }
+            }
+            
+            // Обновляем интерфейс
+            updateDisplay();
+        }
+        
+        // Добавление оценки
+        function addRating(type) {
+            const newRating = {
+                type: type,
+                timestamp: new Date().toISOString(),
+                id: Date.now() // уникальный ID
+            };
+            
+            ratings.push(newRating);
+            
+            // Сохраняем в localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings));
+            
+            // Обновляем экран
+            updateDisplay();
+            
+            // Маленькая анимация - вибрация если поддерживается
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(10);
+            }
+        }
+        
+        // Обновление всего интерфейса
+        function updateDisplay() {
+            // Считаем статистику
+            const starCount = ratings.filter(r => r.type === 'star').length;
+            const snowflakeCount = ratings.filter(r => r.type === 'snowflake').length;
+            const total = ratings.length;
+            
+            // Обновляем счетчики
+            document.getElementById('starCount').textContent = starCount;
+            document.getElementById('snowflakeCount').textContent = snowflakeCount;
+            document.getElementById('totalCount').textContent = total + ' всего';
+            
+            // Обновляем историю
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            if (ratings.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">✨ Пока нет оценок. Нажмите на звездочку или снежинку!</div>';
+                return;
+            }
+            
+            // Показываем последние 30 оценок (сначала новые)
+            const recentRatings = [...ratings].reverse().slice(0, 30);
+            
+            recentRatings.forEach(rating => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                
+                const date = new Date(rating.timestamp);
+                
+                // Форматируем дату
+                let timeStr;
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (date >= today) {
+                    timeStr = 'Сегодня, ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+                } else if (date >= yesterday) {
+                    timeStr = 'Вчера, ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    timeStr = date.toLocaleDateString('ru', { day: 'numeric', month: 'short' }) + 
+                              ', ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+                }
+                
+                item.innerHTML = `
+                    <span class="history-emoji">${rating.type === 'star' ? '⭐' : '❄️'}</span>
+                    <span class="history-text">${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
+                    <span class="history-time">${timeStr}</span>
+                `;
+                
+                historyList.appendChild(item);
+            });
+            
+            // Если есть еще записи, показываем подсказку
+            if (ratings.length > 30) {
+                const more = document.createElement('div');
+                more.className = 'history-item';
+                more.style.justifyContent = 'center';
+                more.style.background = 'transparent';
+                more.style.boxShadow = 'none';
+                more.innerHTML = `<span class="history-time">... и еще ${ratings.length - 30} записей</span>`;
+                historyList.appendChild(more);
+            }
+        }
+        
+        // Сброс всех данных
+        function resetData() {
+            if (confirm('Точно удалить всю историю оценок?')) {
+                ratings = [];
+                localStorage.removeItem(STORAGE_KEY);
+                updateDisplay();
+            }
+        }
+        
+        // Запускаем при загрузке
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
