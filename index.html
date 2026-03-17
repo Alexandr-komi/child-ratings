@@ -137,7 +137,7 @@
             background: linear-gradient(145deg, #e0f2fe, #bae6fd);
         }
         
-        /* Модальное окно с паролем и примечанием */
+        /* Модальное окно */
         .password-overlay {
             display: none;
             position: fixed;
@@ -379,29 +379,6 @@
             text-align: center;
             margin-top: 10px;
         }
-        
-        .quick-notes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-            justify-content: center;
-        }
-        
-        .quick-note-btn {
-            background: #f1f5f9;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 14px;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-note-btn:hover {
-            background: #e2e8f0;
-        }
     </style>
 </head>
 <body>
@@ -457,19 +434,14 @@
         </div>
     </div>
 
-    <!-- Модальное окно для оценки с примечанием -->
+    <!-- Модальное окно для оценки -->
     <div class="password-overlay" id="ratingModal">
         <div class="password-modal">
             <h3 id="modalTitle">⭐ Звездочка</h3>
-            <p id="modalDescription">За что сегодня хвалим?</p>
+            <p id="modalDescription">Напишите, за что оценка</p>
             
-            <!-- Быстрые примечания -->
-            <div class="quick-notes" id="quickNotes">
-                <!-- Заполняется JS -->
-            </div>
-            
-            <!-- Поле для своего примечания -->
-            <textarea class="note-input" id="ratingNote" placeholder="Напишите свой вариант..." rows="2"></textarea>
+            <!-- Только поле для ввода, без подсказок -->
+            <textarea class="note-input" id="ratingNote" placeholder="Например: помыл посуду, сделал уроки..." rows="3"></textarea>
             
             <div class="password-inputs">
                 <input type="text" class="password-digit" id="digit1" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit2')">
@@ -508,30 +480,11 @@
     <script>
         // НАСТРОЙКИ
         const PARENT_PASSWORD = "1234";
-        const STORAGE_KEY = 'pasha_ratings_with_notes';
+        const STORAGE_KEY = 'pasha_ratings_clean';
         const SNOWFLAKES_TO_STAR = 5;
-        
-        // Быстрые варианты примечаний
-        const QUICK_NOTES = {
-            star: [
-                "🌟 Молодец!",
-                "🍽️ Помыл посуду",
-                "📚 Сделал уроки",
-                "🧹 Убрал в комнате",
-                "❤️ Помог маме"
-            ],
-            snowflake: [
-                "⚠️ Не убрал игрушки",
-                "📵 Много телефона",
-                "🗣️ Грубил",
-                "⏰ Опоздал",
-                "😞 Плохое поведение"
-            ]
-        };
         
         let ratings = [];
         let currentRatingType = null;
-        let currentNote = "";
         
         // Загрузка данных
         function init() {
@@ -549,26 +502,9 @@
         // Показать окно для оценки
         function showRatingModal(type) {
             currentRatingType = type;
-            currentNote = "";
             
             document.getElementById('modalTitle').innerHTML = type === 'star' ? '⭐ Звездочка' : '❄️ Снежинка';
             document.getElementById('modalDescription').innerHTML = type === 'star' ? 'За что хвалим?' : 'За что замечание?';
-            
-            // Заполняем быстрые кнопки
-            const quickNotesDiv = document.getElementById('quickNotes');
-            quickNotesDiv.innerHTML = '';
-            
-            const notes = QUICK_NOTES[type];
-            notes.forEach(note => {
-                const btn = document.createElement('button');
-                btn.className = 'quick-note-btn';
-                btn.textContent = note;
-                btn.onclick = () => {
-                    document.getElementById('ratingNote').value = note;
-                    currentNote = note;
-                };
-                quickNotesDiv.appendChild(btn);
-            });
             
             // Очищаем поле ввода
             document.getElementById('ratingNote').value = '';
@@ -588,7 +524,6 @@
         function hideRatingModal() {
             document.getElementById('ratingModal').style.display = 'none';
             currentRatingType = null;
-            currentNote = "";
         }
         
         // Показать окно сброса
@@ -685,14 +620,13 @@
             const enteredPassword = d1 + d2 + d3 + d4;
             
             if (enteredPassword === PARENT_PASSWORD) {
-                // Получаем примечание
-                const note = document.getElementById('ratingNote').value.trim() || 
-                           (currentRatingType === 'star' ? '👍 Молодец!' : '👎 Замечание');
+                // Получаем примечание (можно оставить пустым)
+                const note = document.getElementById('ratingNote').value.trim();
                 
                 // Добавляем оценку
                 const newRating = {
                     type: currentRatingType,
-                    note: note,
+                    note: note || (currentRatingType === 'star' ? '⭐' : '❄️'),
                     timestamp: new Date().toISOString(),
                     id: Date.now()
                 };
@@ -770,7 +704,7 @@
                 // Добавляем 1 звезду с пометкой о конвертации
                 ratings.push({
                     type: 'star',
-                    note: '🎉 Конвертация: 5 снежинок → 1 звезда',
+                    note: '🎉 Автоматическая конвертация: 5 снежинок → 1 звезда',
                     timestamp: new Date().toISOString(),
                     id: Date.now() + Math.random(),
                     isConversion: true
@@ -832,11 +766,6 @@
                 historyList.appendChild(item);
             });
         }
-        
-        // Обновление примечания при вводе
-        document.getElementById('ratingNote').addEventListener('input', function(e) {
-            currentNote = e.target.value;
-        });
         
         // Закрытие модалок по клику на фон
         document.getElementById('ratingModal').addEventListener('click', function(e) {
