@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оценки для Мишеньки</title>
+    <title>Оценки для Паши</title>
     <style>
         * {
             margin: 0;
@@ -35,18 +35,11 @@
             margin-bottom: 20px;
         }
         
-        .header h1 {
-            color: #333;
-            font-size: 24px;
-            font-weight: 400;
-            margin-bottom: 5px;
-        }
-        
         .child-name {
-            font-size: 42px;
+            font-size: 48px;
             font-weight: bold;
             color: #764ba2;
-            text-shadow: 2px 2px 4px rgba(118, 75, 162, 0.2);
+            margin-top: 5px;
         }
         
         .counters {
@@ -64,31 +57,27 @@
         
         .counter-emoji {
             font-size: 48px;
-            line-height: 1;
         }
         
         .counter-number {
             font-size: 54px;
             font-weight: 800;
-            line-height: 1.2;
         }
         
         .star-number {
             color: #fbbf24;
-            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
         }
         
         .snowflake-number {
             color: #38bdf8;
-            text-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
         }
         
         .counter-label {
             font-size: 16px;
             color: #64748b;
-            font-weight: 500;
         }
         
+        /* Кнопки оценок */
         .buttons {
             display: flex;
             gap: 15px;
@@ -102,35 +91,113 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             background: white;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
         
         .btn:active {
-            transform: scale(0.92);
+            transform: scale(0.95);
         }
         
         .btn-star {
             background: linear-gradient(145deg, #fef9c3, #fde047);
-            color: #b45309;
-        }
-        
-        .btn-star:hover {
-            background: linear-gradient(145deg, #fde047, #facc15);
-            box-shadow: 0 12px 25px rgba(250, 204, 21, 0.4);
         }
         
         .btn-snowflake {
             background: linear-gradient(145deg, #e0f2fe, #bae6fd);
-            color: #0369a1;
         }
         
-        .btn-snowflake:hover {
-            background: linear-gradient(145deg, #bae6fd, #7dd3fc);
-            box-shadow: 0 12px 25px rgba(56, 189, 248, 0.4);
+        /* Пароль (появляется при нажатии) */
+        .password-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
         
+        .password-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        
+        .password-modal h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .password-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .password-digit {
+            width: 60px;
+            height: 70px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            background: white;
+        }
+        
+        .password-digit:focus {
+            border-color: #764ba2;
+            outline: none;
+        }
+        
+        .password-error {
+            color: #ef4444;
+            margin: 10px 0;
+            min-height: 24px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .modal-btn.cancel {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        
+        .modal-btn.submit {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .modal-btn.submit:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        /* История */
         .history-section {
             background: #f8fafc;
             border-radius: 20px;
@@ -141,22 +208,12 @@
         .history-title {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 15px;
         }
         
         .history-title h2 {
             color: #334155;
             font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .history-title span {
-            color: #64748b;
-            font-size: 14px;
-            background: #e2e8f0;
-            padding: 4px 10px;
-            border-radius: 20px;
         }
         
         .history-list {
@@ -173,37 +230,16 @@
             background: white;
             border-radius: 12px;
             margin-bottom: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .history-emoji {
             font-size: 28px;
-            min-width: 40px;
-            text-align: center;
-        }
-        
-        .history-text {
-            flex: 1;
-            font-size: 16px;
-            color: #334155;
         }
         
         .history-time {
             color: #94a3b8;
             font-size: 13px;
-            white-space: nowrap;
+            margin-left: auto;
         }
         
         .footer {
@@ -217,21 +253,13 @@
             padding: 10px 25px;
             border-radius: 50px;
             color: #64748b;
-            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .reset-btn:hover {
-            background: #e2e8f0;
-            color: #334155;
         }
         
         .empty-history {
             text-align: center;
             color: #94a3b8;
-            padding: 30px 20px;
-            font-style: italic;
+            padding: 30px;
         }
     </style>
 </head>
@@ -239,9 +267,10 @@
     <div class="container">
         <div class="header">
             <h1>🌟 Оценки для</h1>
-            <div class="child-name" id="childName">Мишеньки</div>
+            <div class="child-name">Паши</div>
         </div>
         
+        <!-- Счетчики -->
         <div class="counters">
             <div class="counter-item">
                 <div class="counter-emoji">⭐</div>
@@ -255,19 +284,37 @@
             </div>
         </div>
         
+        <!-- Кнопки оценок -->
         <div class="buttons">
-            <button class="btn btn-star" onclick="addRating('star')">⭐</button>
-            <button class="btn btn-snowflake" onclick="addRating('snowflake')">❄️</button>
+            <button class="btn btn-star" onclick="showPasswordModal('star')">⭐</button>
+            <button class="btn btn-snowflake" onclick="showPasswordModal('snowflake')">❄️</button>
         </div>
         
+        <!-- Модальное окно с паролем -->
+        <div class="password-overlay" id="passwordModal">
+            <div class="password-modal">
+                <h3 id="modalTitle">⭐ Звездочка</h3>
+                <div class="password-inputs">
+                    <input type="text" class="password-digit" id="digit1" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit2')">
+                    <input type="text" class="password-digit" id="digit2" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit3')">
+                    <input type="text" class="password-digit" id="digit3" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit4')">
+                    <input type="text" class="password-digit" id="digit4" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="checkPassword(this)">
+                </div>
+                <div class="password-error" id="passwordError"></div>
+                <div class="modal-buttons">
+                    <button class="modal-btn cancel" onclick="hidePasswordModal()">Отмена</button>
+                    <button class="modal-btn submit" id="submitBtn" onclick="submitPassword()" disabled>Поставить</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- История -->
         <div class="history-section">
             <div class="history-title">
                 <h2>📋 История</h2>
                 <span id="totalCount">0 всего</span>
             </div>
-            <div class="history-list" id="historyList">
-                <!-- История будет здесь -->
-            </div>
+            <div class="history-list" id="historyList"></div>
         </div>
         
         <div class="footer">
@@ -276,21 +323,15 @@
     </div>
 
     <script>
-        // НАСТРОЙКИ - поменяйте на имя вашего ребенка
-        const CHILD_NAME = "Мишенька";
+        // НАСТРОЙКИ
+        const PARENT_PASSWORD = "1234"; // 4-значный пароль
+        const STORAGE_KEY = 'pasha_ratings';
         
-        // Ключ для хранения в localStorage
-        const STORAGE_KEY = 'child_ratings';
-        
-        // Загружаем данные
         let ratings = [];
+        let selectedType = null; // 'star' или 'snowflake'
         
-        // Инициализация при загрузке
+        // Загрузка данных
         function init() {
-            // Устанавливаем имя ребенка
-            document.getElementById('childName').textContent = CHILD_NAME;
-            
-            // Загружаем сохраненные оценки
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
@@ -299,9 +340,87 @@
                     ratings = [];
                 }
             }
-            
-            // Обновляем интерфейс
             updateDisplay();
+        }
+        
+        // Показать окно пароля
+        function showPasswordModal(type) {
+            selectedType = type;
+            document.getElementById('modalTitle').innerHTML = type === 'star' ? '⭐ Звездочка' : '❄️ Снежинка';
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('digit1').focus();
+            clearPassword();
+        }
+        
+        // Скрыть окно пароля
+        function hidePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            clearPassword();
+        }
+        
+        // Очистить поля пароля
+        function clearPassword() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`digit${i}`).value = '';
+            }
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('passwordError').textContent = '';
+        }
+        
+        // Переход к следующему полю
+        function moveToNext(current, nextId) {
+            if (current.value.length === 1) {
+                const next = document.getElementById(nextId);
+                if (next) next.focus();
+            }
+            checkDigitsFilled();
+        }
+        
+        // Проверка заполнения всех цифр
+        function checkDigitsFilled() {
+            const d1 = document.getElementById('digit1').value;
+            const d2 = document.getElementById('digit2').value;
+            const d3 = document.getElementById('digit3').value;
+            const d4 = document.getElementById('digit4').value;
+            
+            document.getElementById('submitBtn').disabled = !(d1 && d2 && d3 && d4);
+        }
+        
+        // Проверка пароля (при вводе последней цифры)
+        function checkPassword(lastInput) {
+            moveToNext(lastInput, null);
+            checkDigitsFilled();
+            
+            // Автоматическая отправка при вводе последней цифры
+            const d1 = document.getElementById('digit1').value;
+            const d2 = document.getElementById('digit2').value;
+            const d3 = document.getElementById('digit3').value;
+            const d4 = document.getElementById('digit4').value;
+            
+            if (d1 && d2 && d3 && d4) {
+                setTimeout(() => submitPassword(), 100);
+            }
+        }
+        
+        // Отправка пароля
+        function submitPassword() {
+            const d1 = document.getElementById('digit1').value;
+            const d2 = document.getElementById('digit2').value;
+            const d3 = document.getElementById('digit3').value;
+            const d4 = document.getElementById('digit4').value;
+            
+            const enteredPassword = d1 + d2 + d3 + d4;
+            
+            if (enteredPassword === PARENT_PASSWORD) {
+                // Правильный пароль - ставим оценку
+                addRating(selectedType);
+                hidePasswordModal();
+            } else {
+                // Неправильный пароль
+                document.getElementById('passwordError').textContent = 'Неверный пароль';
+                clearPassword();
+                document.getElementById('digit1').focus();
+            }
         }
         
         // Добавление оценки
@@ -309,100 +428,74 @@
             const newRating = {
                 type: type,
                 timestamp: new Date().toISOString(),
-                id: Date.now() // уникальный ID
+                id: Date.now()
             };
             
             ratings.push(newRating);
-            
-            // Сохраняем в localStorage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings));
-            
-            // Обновляем экран
             updateDisplay();
             
-            // Маленькая анимация - вибрация если поддерживается
+            // Вибрация если есть
             if (window.navigator && window.navigator.vibrate) {
                 window.navigator.vibrate(10);
             }
         }
         
-        // Обновление всего интерфейса
+        // Обновление экрана
         function updateDisplay() {
-            // Считаем статистику
             const starCount = ratings.filter(r => r.type === 'star').length;
             const snowflakeCount = ratings.filter(r => r.type === 'snowflake').length;
-            const total = ratings.length;
             
-            // Обновляем счетчики
             document.getElementById('starCount').textContent = starCount;
             document.getElementById('snowflakeCount').textContent = snowflakeCount;
-            document.getElementById('totalCount').textContent = total + ' всего';
+            document.getElementById('totalCount').textContent = ratings.length + ' всего';
             
-            // Обновляем историю
+            // История
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
             
             if (ratings.length === 0) {
-                historyList.innerHTML = '<div class="empty-history">✨ Пока нет оценок. Нажмите на звездочку или снежинку!</div>';
+                historyList.innerHTML = '<div class="empty-history">✨ Пока нет оценок</div>';
                 return;
             }
             
-            // Показываем последние 30 оценок (сначала новые)
-            const recentRatings = [...ratings].reverse().slice(0, 30);
-            
-            recentRatings.forEach(rating => {
+            [...ratings].reverse().slice(0, 30).forEach(rating => {
+                const date = new Date(rating.timestamp);
+                const timeStr = date.toLocaleString('ru', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    day: 'numeric',
+                    month: 'short'
+                });
+                
                 const item = document.createElement('div');
                 item.className = 'history-item';
-                
-                const date = new Date(rating.timestamp);
-                
-                // Форматируем дату
-                let timeStr;
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-                
-                if (date >= today) {
-                    timeStr = 'Сегодня, ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-                } else if (date >= yesterday) {
-                    timeStr = 'Вчера, ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-                } else {
-                    timeStr = date.toLocaleDateString('ru', { day: 'numeric', month: 'short' }) + 
-                              ', ' + date.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-                }
-                
                 item.innerHTML = `
                     <span class="history-emoji">${rating.type === 'star' ? '⭐' : '❄️'}</span>
-                    <span class="history-text">${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
+                    <span>${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
                     <span class="history-time">${timeStr}</span>
                 `;
-                
                 historyList.appendChild(item);
             });
-            
-            // Если есть еще записи, показываем подсказку
-            if (ratings.length > 30) {
-                const more = document.createElement('div');
-                more.className = 'history-item';
-                more.style.justifyContent = 'center';
-                more.style.background = 'transparent';
-                more.style.boxShadow = 'none';
-                more.innerHTML = `<span class="history-time">... и еще ${ratings.length - 30} записей</span>`;
-                historyList.appendChild(more);
-            }
         }
         
-        // Сброс всех данных
+        // Сброс данных
         function resetData() {
-            if (confirm('Точно удалить всю историю оценок?')) {
+            if (confirm('Удалить все оценки?')) {
                 ratings = [];
                 localStorage.removeItem(STORAGE_KEY);
                 updateDisplay();
             }
         }
         
-        // Запускаем при загрузке
+        // Закрытие модалки по клику на фон
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hidePasswordModal();
+            }
+        });
+        
+        // Запуск
         window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
