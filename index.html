@@ -60,7 +60,6 @@
             padding: 20px;
             background: #f8f9fa;
             border-radius: 20px;
-            position: relative;
         }
         
         .counter-item {
@@ -108,7 +107,6 @@
             transition: width 0.3s;
         }
         
-        /* Кнопки оценок */
         .buttons {
             display: flex;
             gap: 15px;
@@ -139,18 +137,7 @@
             background: linear-gradient(145deg, #e0f2fe, #bae6fd);
         }
         
-        /* Анимация конвертации */
-        @keyframes convert {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); background: #fbbf24; }
-            100% { transform: scale(1); }
-        }
-        
-        .conversion-animation {
-            animation: convert 0.5s ease;
-        }
-        
-        /* Модальное окно с паролем */
+        /* Модальное окно с паролем и примечанием */
         .password-overlay {
             display: none;
             position: fixed;
@@ -169,14 +156,37 @@
             padding: 30px;
             border-radius: 30px;
             width: 90%;
-            max-width: 350px;
+            max-width: 400px;
             text-align: center;
         }
         
         .password-modal h3 {
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-size: 24px;
+        }
+        
+        .password-modal p {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        /* Поле для примечания */
+        .note-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            resize: none;
+            font-family: inherit;
+        }
+        
+        .note-input:focus {
+            border-color: #764ba2;
+            outline: none;
         }
         
         .password-inputs {
@@ -239,6 +249,11 @@
             cursor: not-allowed;
         }
         
+        .modal-btn.danger {
+            background: #ef4444;
+            color: white;
+        }
+        
         /* История */
         .history-section {
             background: #f8fafc;
@@ -260,18 +275,16 @@
         
         .history-list {
             list-style: none;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         
         .history-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
             background: white;
             border-radius: 12px;
-            margin-bottom: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             animation: slideIn 0.3s;
         }
         
@@ -286,8 +299,20 @@
             }
         }
         
+        .history-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
         .history-emoji {
-            font-size: 28px;
+            font-size: 24px;
+        }
+        
+        .history-type {
+            font-weight: 600;
+            color: #334155;
         }
         
         .history-conversion {
@@ -295,14 +320,29 @@
             color: white;
             padding: 2px 8px;
             border-radius: 20px;
-            font-size: 12px;
-            margin-left: 8px;
+            font-size: 11px;
+            font-weight: 600;
         }
         
         .history-time {
             color: #94a3b8;
-            font-size: 13px;
+            font-size: 12px;
             margin-left: auto;
+        }
+        
+        .history-note {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 10px;
+            color: #475569;
+            font-size: 14px;
+            margin-top: 5px;
+            border-left: 4px solid #94a3b8;
+        }
+        
+        .history-note::before {
+            content: "📝 ";
+            opacity: 0.7;
         }
         
         .footer {
@@ -318,16 +358,49 @@
             color: #64748b;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 16px;
         }
         
         .reset-btn:hover {
-            background: #e2e8f0;
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #ef4444;
         }
         
         .empty-history {
             text-align: center;
             color: #94a3b8;
             padding: 30px;
+        }
+        
+        .info-text {
+            color: #94a3b8;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .quick-notes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        
+        .quick-note-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-note-btn:hover {
+            background: #e2e8f0;
         }
     </style>
 </head>
@@ -338,7 +411,6 @@
             <div class="child-name">Паши</div>
         </div>
         
-        <!-- Правило конвертации -->
         <div class="conversion-rule">
             ❄️❄️❄️❄️❄️ = ⭐ (5 снежинок = 1 звезда)
         </div>
@@ -354,7 +426,6 @@
                 <div class="counter-emoji">❄️</div>
                 <div class="counter-number snowflake-number" id="snowflakeCount">0</div>
                 <div class="counter-label">снежинок</div>
-                <!-- Прогресс до следующей звезды -->
                 <div class="progress-bar">
                     <div class="progress-fill" id="snowflakeProgress"></div>
                 </div>
@@ -363,50 +434,104 @@
         
         <!-- Кнопки оценок -->
         <div class="buttons">
-            <button class="btn btn-star" onclick="showPasswordModal('star')">⭐</button>
-            <button class="btn btn-snowflake" onclick="showPasswordModal('snowflake')">❄️</button>
+            <button class="btn btn-star" onclick="showRatingModal('star')">⭐</button>
+            <button class="btn btn-snowflake" onclick="showRatingModal('snowflake')">❄️</button>
         </div>
         
-        <!-- Модальное окно с паролем -->
-        <div class="password-overlay" id="passwordModal">
-            <div class="password-modal">
-                <h3 id="modalTitle">⭐ Звездочка</h3>
-                <div class="password-inputs">
-                    <input type="text" class="password-digit" id="digit1" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit2')">
-                    <input type="text" class="password-digit" id="digit2" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit3')">
-                    <input type="text" class="password-digit" id="digit3" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit4')">
-                    <input type="text" class="password-digit" id="digit4" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="checkPassword(this)">
-                </div>
-                <div class="password-error" id="passwordError"></div>
-                <div class="modal-buttons">
-                    <button class="modal-btn cancel" onclick="hidePasswordModal()">Отмена</button>
-                    <button class="modal-btn submit" id="submitBtn" onclick="submitPassword()" disabled>Поставить</button>
-                </div>
-            </div>
+        <!-- Кнопка сброса -->
+        <div style="text-align: center; margin: 15px 0;">
+            <button class="reset-btn" onclick="showResetModal()">🔄 Сбросить все оценки</button>
         </div>
         
         <!-- История -->
         <div class="history-section">
             <div class="history-title">
-                <h2>📋 История</h2>
+                <h2>📋 История с примечаниями</h2>
                 <span id="totalCount">0 всего</span>
             </div>
             <div class="history-list" id="historyList"></div>
         </div>
         
-        <div class="footer">
-            <button class="reset-btn" onclick="resetData()">🔄 Сбросить всё</button>
+        <div class="info-text">
+            🔒 Все изменения только с паролем
+        </div>
+    </div>
+
+    <!-- Модальное окно для оценки с примечанием -->
+    <div class="password-overlay" id="ratingModal">
+        <div class="password-modal">
+            <h3 id="modalTitle">⭐ Звездочка</h3>
+            <p id="modalDescription">За что сегодня хвалим?</p>
+            
+            <!-- Быстрые примечания -->
+            <div class="quick-notes" id="quickNotes">
+                <!-- Заполняется JS -->
+            </div>
+            
+            <!-- Поле для своего примечания -->
+            <textarea class="note-input" id="ratingNote" placeholder="Напишите свой вариант..." rows="2"></textarea>
+            
+            <div class="password-inputs">
+                <input type="text" class="password-digit" id="digit1" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit2')">
+                <input type="text" class="password-digit" id="digit2" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit3')">
+                <input type="text" class="password-digit" id="digit3" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNext(this, 'digit4')">
+                <input type="text" class="password-digit" id="digit4" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="checkPassword(this)">
+            </div>
+            <div class="password-error" id="passwordError"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideRatingModal()">Отмена</button>
+                <button class="modal-btn submit" id="submitBtn" onclick="submitRating()" disabled>Поставить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для сброса -->
+    <div class="password-overlay" id="resetModal">
+        <div class="password-modal">
+            <h3>⚠️ Сброс всех оценок</h3>
+            <p>Введите пароль для подтверждения</p>
+            
+            <div class="password-inputs">
+                <input type="text" class="password-digit" id="resetDigit1" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNextReset(this, 'resetDigit2')">
+                <input type="text" class="password-digit" id="resetDigit2" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNextReset(this, 'resetDigit3')">
+                <input type="text" class="password-digit" id="resetDigit3" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="moveToNextReset(this, 'resetDigit4')">
+                <input type="text" class="password-digit" id="resetDigit4" maxlength="1" pattern="\d" inputmode="numeric" onkeyup="checkResetPassword(this)">
+            </div>
+            <div class="password-error" id="resetPasswordError"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="hideResetModal()">Отмена</button>
+                <button class="modal-btn danger" id="resetSubmitBtn" onclick="submitReset()" disabled>Сбросить всё</button>
+            </div>
         </div>
     </div>
 
     <script>
         // НАСТРОЙКИ
-        const PARENT_PASSWORD = "1234"; // 4-значный пароль
-        const STORAGE_KEY = 'pasha_ratings_conversion';
-        const SNOWFLAKES_TO_STAR = 5; // 5 снежинок = 1 звезда
+        const PARENT_PASSWORD = "1234";
+        const STORAGE_KEY = 'pasha_ratings_with_notes';
+        const SNOWFLAKES_TO_STAR = 5;
+        
+        // Быстрые варианты примечаний
+        const QUICK_NOTES = {
+            star: [
+                "🌟 Молодец!",
+                "🍽️ Помыл посуду",
+                "📚 Сделал уроки",
+                "🧹 Убрал в комнате",
+                "❤️ Помог маме"
+            ],
+            snowflake: [
+                "⚠️ Не убрал игрушки",
+                "📵 Много телефона",
+                "🗣️ Грубил",
+                "⏰ Опоздал",
+                "😞 Плохое поведение"
+            ]
+        };
         
         let ratings = [];
-        let selectedType = null;
+        let currentRatingType = null;
+        let currentNote = "";
         
         // Загрузка данных
         function init() {
@@ -421,31 +546,68 @@
             updateDisplay();
         }
         
-        // Показать окно пароля
-        function showPasswordModal(type) {
-            selectedType = type;
+        // Показать окно для оценки
+        function showRatingModal(type) {
+            currentRatingType = type;
+            currentNote = "";
+            
             document.getElementById('modalTitle').innerHTML = type === 'star' ? '⭐ Звездочка' : '❄️ Снежинка';
-            document.getElementById('passwordModal').style.display = 'flex';
-            document.getElementById('digit1').focus();
-            clearPassword();
-        }
-        
-        // Скрыть окно пароля
-        function hidePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            clearPassword();
-        }
-        
-        // Очистить поля пароля
-        function clearPassword() {
+            document.getElementById('modalDescription').innerHTML = type === 'star' ? 'За что хвалим?' : 'За что замечание?';
+            
+            // Заполняем быстрые кнопки
+            const quickNotesDiv = document.getElementById('quickNotes');
+            quickNotesDiv.innerHTML = '';
+            
+            const notes = QUICK_NOTES[type];
+            notes.forEach(note => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-note-btn';
+                btn.textContent = note;
+                btn.onclick = () => {
+                    document.getElementById('ratingNote').value = note;
+                    currentNote = note;
+                };
+                quickNotesDiv.appendChild(btn);
+            });
+            
+            // Очищаем поле ввода
+            document.getElementById('ratingNote').value = '';
+            
+            // Очищаем пароль
             for (let i = 1; i <= 4; i++) {
                 document.getElementById(`digit${i}`).value = '';
             }
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('passwordError').textContent = '';
+            
+            document.getElementById('ratingModal').style.display = 'flex';
+            document.getElementById('digit1').focus();
         }
         
-        // Переход к следующему полю
+        // Скрыть окно оценки
+        function hideRatingModal() {
+            document.getElementById('ratingModal').style.display = 'none';
+            currentRatingType = null;
+            currentNote = "";
+        }
+        
+        // Показать окно сброса
+        function showResetModal() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`resetDigit${i}`).value = '';
+            }
+            document.getElementById('resetSubmitBtn').disabled = true;
+            document.getElementById('resetPasswordError').textContent = '';
+            document.getElementById('resetModal').style.display = 'flex';
+            document.getElementById('resetDigit1').focus();
+        }
+        
+        // Скрыть окно сброса
+        function hideResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+        }
+        
+        // Переход к следующему полю (оценка)
         function moveToNext(current, nextId) {
             if (current.value.length === 1) {
                 const next = document.getElementById(nextId);
@@ -454,7 +616,16 @@
             checkDigitsFilled();
         }
         
-        // Проверка заполнения всех цифр
+        // Переход к следующему полю (сброс)
+        function moveToNextReset(current, nextId) {
+            if (current.value.length === 1) {
+                const next = document.getElementById(nextId);
+                if (next) next.focus();
+            }
+            checkResetDigitsFilled();
+        }
+        
+        // Проверка заполнения цифр (оценка)
         function checkDigitsFilled() {
             const d1 = document.getElementById('digit1').value;
             const d2 = document.getElementById('digit2').value;
@@ -464,7 +635,17 @@
             document.getElementById('submitBtn').disabled = !(d1 && d2 && d3 && d4);
         }
         
-        // Проверка пароля (при вводе последней цифры)
+        // Проверка заполнения цифр (сброс)
+        function checkResetDigitsFilled() {
+            const d1 = document.getElementById('resetDigit1').value;
+            const d2 = document.getElementById('resetDigit2').value;
+            const d3 = document.getElementById('resetDigit3').value;
+            const d4 = document.getElementById('resetDigit4').value;
+            
+            document.getElementById('resetSubmitBtn').disabled = !(d1 && d2 && d3 && d4);
+        }
+        
+        // Проверка пароля (оценка)
         function checkPassword(lastInput) {
             moveToNext(lastInput, null);
             checkDigitsFilled();
@@ -475,12 +656,27 @@
             const d4 = document.getElementById('digit4').value;
             
             if (d1 && d2 && d3 && d4) {
-                setTimeout(() => submitPassword(), 100);
+                setTimeout(() => submitRating(), 100);
             }
         }
         
-        // Отправка пароля
-        function submitPassword() {
+        // Проверка пароля (сброс)
+        function checkResetPassword(lastInput) {
+            moveToNextReset(lastInput, null);
+            checkResetDigitsFilled();
+            
+            const d1 = document.getElementById('resetDigit1').value;
+            const d2 = document.getElementById('resetDigit2').value;
+            const d3 = document.getElementById('resetDigit3').value;
+            const d4 = document.getElementById('resetDigit4').value;
+            
+            if (d1 && d2 && d3 && d4) {
+                setTimeout(() => submitReset(), 100);
+            }
+        }
+        
+        // Отправка оценки
+        function submitRating() {
             const d1 = document.getElementById('digit1').value;
             const d2 = document.getElementById('digit2').value;
             const d3 = document.getElementById('digit3').value;
@@ -489,44 +685,70 @@
             const enteredPassword = d1 + d2 + d3 + d4;
             
             if (enteredPassword === PARENT_PASSWORD) {
-                addRating(selectedType);
-                hidePasswordModal();
+                // Получаем примечание
+                const note = document.getElementById('ratingNote').value.trim() || 
+                           (currentRatingType === 'star' ? '👍 Молодец!' : '👎 Замечание');
+                
+                // Добавляем оценку
+                const newRating = {
+                    type: currentRatingType,
+                    note: note,
+                    timestamp: new Date().toISOString(),
+                    id: Date.now()
+                };
+                
+                ratings.push(newRating);
+                
+                // Проверяем конвертацию
+                checkAndConvertSnowflakes();
+                
+                // Сохраняем
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings));
+                
+                // Обновляем экран
+                updateDisplay();
+                
+                hideRatingModal();
+                
+                // Вибрация
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(10);
+                }
             } else {
                 document.getElementById('passwordError').textContent = 'Неверный пароль';
-                clearPassword();
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`digit${i}`).value = '';
+                }
                 document.getElementById('digit1').focus();
             }
         }
         
-        // Добавление оценки
-        function addRating(type) {
-            // Добавляем новую оценку
-            const newRating = {
-                type: type,
-                timestamp: new Date().toISOString(),
-                id: Date.now()
-            };
+        // Отправка сброса
+        function submitReset() {
+            const d1 = document.getElementById('resetDigit1').value;
+            const d2 = document.getElementById('resetDigit2').value;
+            const d3 = document.getElementById('resetDigit3').value;
+            const d4 = document.getElementById('resetDigit4').value;
             
-            ratings.push(newRating);
+            const enteredPassword = d1 + d2 + d3 + d4;
             
-            // Проверяем конвертацию снежинок в звезды
-            checkAndConvertSnowflakes();
-            
-            // Сохраняем
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(ratings));
-            
-            // Обновляем экран
-            updateDisplay();
-            
-            // Анимация на счетчике
-            document.querySelector('.counters').classList.add('conversion-animation');
-            setTimeout(() => {
-                document.querySelector('.counters').classList.remove('conversion-animation');
-            }, 500);
-            
-            // Вибрация
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(10);
+            if (enteredPassword === PARENT_PASSWORD) {
+                if (confirm('Точно удалить все оценки?')) {
+                    ratings = [];
+                    localStorage.removeItem(STORAGE_KEY);
+                    updateDisplay();
+                    hideResetModal();
+                    
+                    if (window.navigator && window.navigator.vibrate) {
+                        window.navigator.vibrate(50);
+                    }
+                }
+            } else {
+                document.getElementById('resetPasswordError').textContent = 'Неверный пароль';
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`resetDigit${i}`).value = '';
+                }
+                document.getElementById('resetDigit1').focus();
             }
         }
         
@@ -534,27 +756,26 @@
         function checkAndConvertSnowflakes() {
             let snowflakes = ratings.filter(r => r.type === 'snowflake').length;
             
-            // Пока есть 5 или больше снежинок - конвертируем
             while (snowflakes >= SNOWFLAKES_TO_STAR) {
                 // Удаляем 5 снежинок (самые старые)
                 let removed = 0;
                 ratings = ratings.filter(r => {
                     if (r.type === 'snowflake' && removed < SNOWFLAKES_TO_STAR) {
                         removed++;
-                        return false; // удаляем
+                        return false;
                     }
                     return true;
                 });
                 
-                // Добавляем 1 звезду
+                // Добавляем 1 звезду с пометкой о конвертации
                 ratings.push({
                     type: 'star',
+                    note: '🎉 Конвертация: 5 снежинок → 1 звезда',
                     timestamp: new Date().toISOString(),
                     id: Date.now() + Math.random(),
-                    isConversion: true // отметка что это конвертация
+                    isConversion: true
                 });
                 
-                // Пересчитываем снежинки для следующей итерации
                 snowflakes = ratings.filter(r => r.type === 'snowflake').length;
             }
         }
@@ -568,7 +789,7 @@
             document.getElementById('snowflakeCount').textContent = snowflakeCount;
             document.getElementById('totalCount').textContent = ratings.length + ' всего';
             
-            // Обновляем прогресс до следующей звезды
+            // Прогресс до следующей звезды
             const progress = (snowflakeCount % SNOWFLAKES_TO_STAR) / SNOWFLAKES_TO_STAR * 100;
             document.getElementById('snowflakeProgress').style.width = progress + '%';
             
@@ -581,7 +802,7 @@
                 return;
             }
             
-            [...ratings].reverse().slice(0, 30).forEach(rating => {
+            [...ratings].reverse().forEach(rating => {
                 const date = new Date(rating.timestamp);
                 const timeStr = date.toLocaleString('ru', { 
                     hour: '2-digit', 
@@ -593,41 +814,40 @@
                 const item = document.createElement('div');
                 item.className = 'history-item';
                 
-                if (rating.isConversion) {
-                    // Специальное отображение для конвертации
-                    item.innerHTML = `
-                        <span class="history-emoji">⭐</span>
-                        <span>
-                            🎉 Конвертация: 5 ❄️ → ⭐
-                            <span class="history-conversion">+1 звезда</span>
-                        </span>
+                let typeText = rating.type === 'star' ? 'Звездочка' : 'Снежинка';
+                let emoji = rating.type === 'star' ? '⭐' : '❄️';
+                
+                let conversionBadge = rating.isConversion ? '<span class="history-conversion">конвертация</span>' : '';
+                
+                item.innerHTML = `
+                    <div class="history-header">
+                        <span class="history-emoji">${emoji}</span>
+                        <span class="history-type">${typeText}</span>
+                        ${conversionBadge}
                         <span class="history-time">${timeStr}</span>
-                    `;
-                } else {
-                    item.innerHTML = `
-                        <span class="history-emoji">${rating.type === 'star' ? '⭐' : '❄️'}</span>
-                        <span>${rating.type === 'star' ? 'Звездочка' : 'Снежинка'}</span>
-                        <span class="history-time">${timeStr}</span>
-                    `;
-                }
+                    </div>
+                    <div class="history-note">${rating.note || '—'}</div>
+                `;
                 
                 historyList.appendChild(item);
             });
         }
         
-        // Сброс данных
-        function resetData() {
-            if (confirm('Удалить все оценки?')) {
-                ratings = [];
-                localStorage.removeItem(STORAGE_KEY);
-                updateDisplay();
-            }
-        }
+        // Обновление примечания при вводе
+        document.getElementById('ratingNote').addEventListener('input', function(e) {
+            currentNote = e.target.value;
+        });
         
-        // Закрытие модалки по клику на фон
-        document.getElementById('passwordModal').addEventListener('click', function(e) {
+        // Закрытие модалок по клику на фон
+        document.getElementById('ratingModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                hidePasswordModal();
+                hideRatingModal();
+            }
+        });
+        
+        document.getElementById('resetModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideResetModal();
             }
         });
         
